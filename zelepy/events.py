@@ -20,15 +20,15 @@ class ZelesisClient:
         >>> client.click_mouse()
     """
     
-    DEFAULT_BROADCAST_PORT = 26512
-    DEFAULT_COMMAND_PORT = 26513
+    DEFAULT_RECEIVE_PORT = 26512
+    DEFAULT_SEND_PORT = 26513
     DEFAULT_TIMEOUT = 2.0
     DEFAULT_BUFFER_SIZE = 65535
     
     def __init__(
         self,
-        broadcast_port: int = DEFAULT_BROADCAST_PORT,
-        command_port: int = DEFAULT_COMMAND_PORT,
+        receive_port: int = DEFAULT_RECEIVE_PORT,
+        send_port: int = DEFAULT_SEND_PORT,
         target_ip: str = "127.0.0.1",
         timeout: float = DEFAULT_TIMEOUT,
     ):
@@ -36,13 +36,13 @@ class ZelesisClient:
         Initialize the Zelesis client.
         
         Args:
-            broadcast_port: Port to listen for broadcast events (default: 26512)
-            command_port: Port to send commands to (default: 26513)
+            receive_port: Port to listen for broadcast events (default: 26512)
+            send_port: Port to send commands to (default: 26513)
             target_ip: IP address of the Zelesis Neo instance (default: 127.0.0.1)
             timeout: Timeout for command responses in seconds (default: 2.0)
         """
-        self.broadcast_port = broadcast_port
-        self.command_port = command_port
+        self.receive_port = receive_port
+        self.send_port = send_port
         self.target_ip = target_ip
         self.timeout = timeout
         
@@ -54,7 +54,7 @@ class ZelesisClient:
         # Event subscriptions: event_name -> list of callbacks
         self._subscriptions: Dict[str, List[Callable[[Dict[str, Any]], None]]] = {}
         
-        # General event callbacks (for backward compatibility)
+        # General event callbacks
         self._event_callbacks: List[Callable[[Dict[str, Any]], None]] = []
     
     def subscribe(self, event_name: str, callback: Callable[[Dict[str, Any]], None]) -> None:
@@ -90,9 +90,7 @@ class ZelesisClient:
     
     def add_event_listener(self, callback: Callable[[Dict[str, Any]], None]) -> None:
         """
-        Add a general event listener (receives all events).
-        
-        This is for backward compatibility. Prefer using subscribe() for specific events.
+        Add a general event listener (receives all events). It is prefered to use subscribe() for specific events.
         
         Args:
             callback: Function to call for any event
@@ -121,7 +119,7 @@ class ZelesisClient:
         # Create broadcast listener socket
         self._listener_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self._listener_sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
-        self._listener_sock.bind(("", self.broadcast_port))
+        self._listener_sock.bind(("", self.receive_port))
         
         # Create command socket
         self._command_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -221,7 +219,7 @@ class ZelesisClient:
         
         try:
             msg = json.dumps(command_data).encode('utf-8')
-            self._command_sock.sendto(msg, (self.target_ip, self.command_port))
+            self._command_sock.sendto(msg, (self.target_ip, self.send_port))
             
             if wait_response:
                 try:
