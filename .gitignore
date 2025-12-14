@@ -1,0 +1,59 @@
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# venv
+venv/
+env/
+ENV/
+.venv
+.env
+
+# builds
+dist/
+build/
+*.egg-info/
+.eggs/
+
+# testing
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.hypothesis/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# log
+*.log
+
+# scary stuff plss dont hacc me
+../pypi_token.txt
+pypi_token.txt
+
+pyproject.toml
+build.toml
+
+# upload to pypi/pupi
+upload/
+pupi/
+
+# tests folder
+tests/
+
+# Building stuff
+MANIFEST.in
+upload_to_pypi.py
+upload_to_pypi.bat
+build.bat
