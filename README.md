@@ -66,9 +66,6 @@ with ZelesisClient() as client:
     # Or you can create a generic listener that will be called whenever ANY event is received
     client.add_event_listener(on_any_event)
 
-    # You must start the client to be able to listen to events
-    client.start()
-
     # Client runs until context exits
 ```
 
