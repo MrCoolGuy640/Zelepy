@@ -48,6 +48,7 @@ client = ZelesisClient(
 ### Event Listening
 ```python
 from zelepy.events import ZelesisClient
+import time
 
 def on_detection(event):
     print(f"Detection: {event}")
@@ -66,7 +67,8 @@ with ZelesisClient() as client:
     # Or you can create a generic listener that will be called whenever ANY event is received
     client.add_event_listener(on_any_event)
 
-    # Client runs until context exits
+    while True:
+        time.sleep(0.01)
 ```
 
 ### Event Broadcasting
