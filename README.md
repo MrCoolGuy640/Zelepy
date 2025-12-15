@@ -83,3 +83,50 @@ with ZelesisClient() as client:
     # Left click the mouse
     client.click_mouse()
 ```
+
+#### Requesting Detections
+There are 2 ways to get Zelesis to run detections for you. You can either provide an image path:
+```py
+from zelepy.events import ZelesisClient
+
+with ZelesisClient() as client:
+    result = client.request_detection("image.png")
+```
+or you can provide the raw image bytes:
+```py
+from zelepy.events import ZelesisClient
+
+with open("your_image.jpg", "rb") as f:
+    image_bytes = f.read()
+
+with ZelesisClient() as client:
+    request_detection_raw(image_bytes)
+```
+Please NOTE that since events are sent around over UDP, the maximum file size, or image bytes size for both methods is approximately 40-50kb.
+There is a helpful function in zelepy.helpers to help minimise your image size to fit the constraints:
+```py
+import zelepy.helpers as helpers
+
+compressed_bytes, info = helpers.compress_image_to_target_size("image.png", target_kb=50)
+print(f"Compressed from {info.original_size_kb:.1f}KB to {info.final_size_kb:.1f}KB")
+print(f"Success: {info.success}, Quality: {info.quality}")
+```
+Note that compress_image_to_target_size returns the compressed bytes, and a CompressionInfo object:
+
+##### `CompressionInfo`
+Information about image compression results.
+
+**Attributes:**
+- `success: bool` - Whether target size was achieved
+- `final_size_kb: float` - Final compressed size in KB
+- `target_size_kb: float` - Target size in KB
+- `original_size_kb: float` - Original size in KB
+- `compression_ratio: float` - Compression ratio (original/final)
+- `quality: int` - Final JPEG quality used
+- `dimensions: Tuple[int, int]` - Final image dimensions
+- `original_dimensions: Tuple[int, int]` - Original image dimensions
+- `iterations: int` - Number of compression iterations
+- `note: Optional[str]` - Additional notes
+
+**Methods:**
+- `to_dict() -> Dict[str, Any]` - Convert to dictionary

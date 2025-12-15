@@ -198,9 +198,23 @@ class ConfigModel:
     preset_names: List[Optional[str]] = None
 
 
+def get_all_preset_names() -> List[str]:
+    """
+    Get all preset names
+    
+    :return: List of all preset names
+    :rtype: List[str]
+    """
+    presets_path = Path(_zelesis_utils._find_zelesis_installation()) / "presets"
+    return [file.stem for file in presets_path.iterdir() if file.is_file()]
+
+
 def create_config_from_default_config_file() -> ConfigModel:
     """
     Create a config class object from the default config file
+    
+    :return: ConfigModel corresponding to default config
+    :rtype: ConfigModel
     """
     config_path = Path(_zelesis_utils._find_zelesis_installation()) / "config.ini"
     cfg = ConfigObj(str(config_path), list_values=False)
@@ -211,9 +225,9 @@ def create_config_from_preset(preset_name: str) -> ConfigModel:
     """
     Create a config class object from a preset file
     
-    :param preset_name: Description
+    :param preset_name: The preset to convert to a ConfigModel object (without .ini extension)
     :type preset_name: str
-    :return: Description
+    :return: ConfigModel corresponding to given preset
     :rtype: ConfigModel
     """
     # find file
@@ -222,11 +236,70 @@ def create_config_from_preset(preset_name: str) -> ConfigModel:
     
     return _load_dataclass_from_config(ConfigModel, cfg)
 
-def _convert_value(value: str, target_type: type) -> Any:
-    """
-    Convert INI strings to actual Python values based on type annotation.
-    """
 
+def write_config_to_default_file(config: ConfigModel) -> None:
+    """
+    Write a ConfigModel object to the default configuration file in the base zelesis neo directory.
+    
+    Requires admin privileges to write to the Zelesis installation directory.
+    
+    :param config: The ConfigModel instance to write
+    :type config: ConfigModel
+    """
+    # Ensure admin privileges
+    _ensure_admin()
+    
+    config_path = Path(_zelesis_utils._find_zelesis_installation()) / "config.ini"
+
+    if not config_path.is_file():
+        raise FileNotFoundError(
+            f"Config file not found at: {config_path}"
+        )
+    
+    # Convert ConfigModel to dictionary
+    config_dict = _convert_config_to_dict(config)
+    
+    # Create ConfigObj and write to file
+    cfg = ConfigObj()
+    cfg.update(config_dict)
+    cfg.filename = str(config_path)
+    cfg.write()
+
+
+def write_config_to_preset(config: ConfigModel, preset_name: str) -> None:
+    """
+    Write a ConfigModel object to a preset file.
+    
+    Requires admin privileges to write to the Zelesis installation directory.
+    
+    :param config: The ConfigModel instance to write
+    :type config: ConfigModel
+    :param preset_name: Name of the preset (without .ini extension)
+    :type preset_name: str
+    """
+    # Ensure admin privileges
+    _ensure_admin()
+    
+    # Find the presets directory
+    presets_dir = Path(_zelesis_utils._find_zelesis_installation()) / "presets"
+    config_path = presets_dir / (preset_name + ".ini")
+    
+    if not presets_dir.is_dir():
+        raise FileNotFoundError(
+            f"Presets directory not found at: {presets_dir}"
+        )
+    
+    # Convert ConfigModel to dictionary
+    config_dict = _convert_config_to_dict(config)
+    
+    # Create ConfigObj and write to file
+    cfg = ConfigObj()
+    cfg.update(config_dict)
+    cfg.filename = str(config_path)
+    cfg.write()
+
+
+def _convert_value(value: str, target_type: type) -> Any:
     # Optional[T] -> treat None or empty string
     origin = get_origin(target_type)
     if origin is Optional:
@@ -263,6 +336,7 @@ def _convert_value(value: str, target_type: type) -> Any:
     # fallback
     return value
 
+
 def _load_dataclass_from_config(cls: type[ConfigModel], config_dict: dict) -> ConfigModel:
     kwargs = {}
 
@@ -285,76 +359,8 @@ def _load_dataclass_from_config(cls: type[ConfigModel], config_dict: dict) -> Co
 
     return cls(**kwargs)
 
-def write_config_to_default_file(config: ConfigModel) -> None:
-    """
-    Write a ConfigModel object to the default configuration file in the base zelesis neo directory.
-    
-    Requires admin privileges to write to the Zelesis installation directory.
-    
-    :param config: The ConfigModel instance to write
-    :type config: ConfigModel
-    """
-    # Ensure admin privileges
-    _ensure_admin()
-    
-    config_path = Path(_zelesis_utils._find_zelesis_installation()) / "config.ini"
-
-    if not config_path.is_file():
-        raise FileNotFoundError(
-            f"Config file not found at: {config_path}"
-        )
-    
-    # Convert ConfigModel to dictionary
-    config_dict = _convert_config_to_dict(config)
-    
-    # Create ConfigObj and write to file
-    cfg = ConfigObj()
-    cfg.update(config_dict)
-    cfg.filename = str(config_path)
-    cfg.write()
-
-def write_config_to_preset(config: ConfigModel, preset_name: str) -> None:
-    """
-    Write a ConfigModel object to a preset file.
-    
-    Requires admin privileges to write to the Zelesis installation directory.
-    
-    :param config: The ConfigModel instance to write
-    :type config: ConfigModel
-    :param preset_name: Name of the preset (without .ini extension)
-    :type preset_name: str
-    """
-    # Ensure admin privileges
-    _ensure_admin()
-    
-    # Find the presets directory
-    presets_dir = Path(_zelesis_utils._find_zelesis_installation()) / "presets"
-    config_path = presets_dir / (preset_name + ".ini")
-    
-    if not presets_dir.is_dir():
-        raise FileNotFoundError(
-            f"Presets directory not found at: {presets_dir}"
-        )
-    
-    # Convert ConfigModel to dictionary
-    config_dict = _convert_config_to_dict(config)
-    
-    # Create ConfigObj and write to file
-    cfg = ConfigObj()
-    cfg.update(config_dict)
-    cfg.filename = str(config_path)
-    cfg.write()
-
 
 def _convert_config_to_dict(config: ConfigModel) -> dict:
-    """
-    Convert a ConfigModel instance to a dictionary suitable for ConfigObj.
-    
-    :param config: The ConfigModel instance
-    :type config: ConfigModel
-    :return: Dictionary representation of the config
-    :rtype: dict
-    """
     config_dict = {}
     model_fields = fields(ConfigModel)
     

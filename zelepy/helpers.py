@@ -51,6 +51,7 @@ class CompressionInfo:
         self.iterations = iterations
         self.note = note
     
+    
     def to_dict(self) -> Dict[str, Any]:
         """
         Convert to dictionary.

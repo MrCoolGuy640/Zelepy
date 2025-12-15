@@ -57,6 +57,7 @@ class ZelesisClient:
         # General event callbacks
         self._event_callbacks: List[Callable[[Dict[str, Any]], None]] = []
     
+
     def subscribe(self, event_name: str, callback: Callable[[Dict[str, Any]], None]) -> None:
         """
         Subscribe to a specific event type.
@@ -69,6 +70,7 @@ class ZelesisClient:
             self._subscriptions[event_name] = []
         self._subscriptions[event_name].append(callback)
     
+
     def unsubscribe(self, event_name: str, callback: Optional[Callable] = None) -> None:
         """
         Unsubscribe from an event type.
@@ -97,6 +99,7 @@ class ZelesisClient:
         """
         self._event_callbacks.append(callback)
     
+
     def remove_event_listener(self, callback: Callable[[Dict[str, Any]], None]) -> None:
         """
         Remove a general event listener.
@@ -107,6 +110,7 @@ class ZelesisClient:
         if callback in self._event_callbacks:
             self._event_callbacks.remove(callback)
     
+
     def start(self) -> None:
         """
         Start listening for events in a background thread.
@@ -181,6 +185,7 @@ class ZelesisClient:
             except Exception as e:
                 pass
     
+
     def _dispatch_event(self, event: Dict[str, Any]) -> None:
         event_type = event.get("event")
         
@@ -199,6 +204,7 @@ class ZelesisClient:
             except Exception as e:
                 pass
     
+
     def send_command(
         self,
         command_data: Dict[str, Any],
@@ -235,6 +241,7 @@ class ZelesisClient:
         
         return None
     
+
     def move_mouse(self, x: int, y: int) -> None:
         """
         Move the mouse by x, y pixels relative to its current position.
@@ -245,16 +252,17 @@ class ZelesisClient:
         """
         self.send_command({"command": "moveMouse", "x": x, "y": y})
     
+
     def click_mouse(self) -> None:
         """Trigger a left mouse click."""
         self.send_command({"command": "clickMouse"})
     
-    def request_detection(self, image_path: Optional[str] = None) -> Optional[Dict[str, Any]]:
+    
+    def request_detection(self, image_path: str) -> Optional[Dict[str, Any]]:
         """
         Request AI detection.
         
         If image_path is provided, detects objects in that image.
-        Otherwise, detects objects on the current screen (ignoring pause state).
         
         Args:
             image_path: Optional path to an image file to analyze
@@ -279,6 +287,7 @@ class ZelesisClient:
         
         return self.send_command(cmd, wait_response=True)
     
+
     def request_detection_raw(self, image_bytes: bytes) -> Optional[Dict[str, Any]]:
         """
         Request detection on raw image bytes.
@@ -296,6 +305,7 @@ class ZelesisClient:
         except Exception as e:
             return None
     
+
     def set_target_ip(self, ip: str) -> None:
         """
         Set the target IP address for commands.
@@ -304,6 +314,7 @@ class ZelesisClient:
             ip: IP address of the Zelesis Neo instance
         """
         self.target_ip = ip
+    
     
     @property
     def is_running(self) -> bool:
