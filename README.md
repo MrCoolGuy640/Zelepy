@@ -111,22 +111,4 @@ compressed_bytes, info = helpers.compress_image_to_target_size("image.png", targ
 print(f"Compressed from {info.original_size_kb:.1f}KB to {info.final_size_kb:.1f}KB")
 print(f"Success: {info.success}, Quality: {info.quality}")
 ```
-Note that compress_image_to_target_size returns the compressed bytes, and a CompressionInfo object:
-
-##### `CompressionInfo`
-Information about image compression results.
-
-**Attributes:**
-- `success: bool` - Whether target size was achieved
-- `final_size_kb: float` - Final compressed size in KB
-- `target_size_kb: float` - Target size in KB
-- `original_size_kb: float` - Original size in KB
-- `compression_ratio: float` - Compression ratio (original/final)
-- `quality: int` - Final JPEG quality used
-- `dimensions: Tuple[int, int]` - Final image dimensions
-- `original_dimensions: Tuple[int, int]` - Original image dimensions
-- `iterations: int` - Number of compression iterations
-- `note: Optional[str]` - Additional notes
-
-**Methods:**
-- `to_dict() -> Dict[str, Any]` - Convert to dictionary
+Note that compress_image_to_target_size returns the compressed bytes, and a CompressionInfo object.
